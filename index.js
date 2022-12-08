@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 5001;
 
 
 async function getHashtag(keyword){
-    const browser = await puppeteer.launch();
+    const browser = await puppeteer.launch({headless: true});
     const page = await browser.newPage();
     await page.goto('https://www.all-hashtag.com/hashtag-generator.php');
     await page.waitForSelector('#keyword');
