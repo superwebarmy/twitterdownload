@@ -12,26 +12,29 @@ const PORT = process.env.PORT || 5001;
 async function getHashtag(keyword){
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
-    await page.goto('https://inflact.com/tools/instagram-hashtag-generator/#/topics/');
-    await page.waitForSelector('.InputElement--3fjog3');
-    await page.type('.InputElement--3fjog3', keyword);
-    await page.click('.ButtonText--1o39ncz');
-    await page.waitForSelector('.ListHashtagElement--13u2epa');
-    const data = await page.evaluate(()=>{
-        const array = Array.from(document.querySelectorAll('.ListHashtagElement--13u2epa'));
-        return array.map((e)=>({
-            hashtag: e.querySelector('.ListHashtagTitle--d95b8k').textContent
-        }));
+    await page.goto('https://www.all-hashtag.com/hashtag-generator.php');
+    await page.waitForSelector('#keyword');
+    await page.type('#keyword', keyword);
+    await page.waitForSelector('.btn-gen');
+    await page.click('.btn-gen');
+    await page.waitForSelector('#copy-hashtags');
+    const hash = await page.evaluate(()=>{
+        return document.querySelector('#copy-hashtags').textContent;
     });
+    const array = hash.split(' ');
+    const objectArray = array.map((e)=>({
+        hashtag: e
+    }));
     browser.close();
-    return data;
+    return objectArray;
 }
+
 
 
 app.post('/api', async (req,res)=>{
     const hashtagKeyword = req.body.hashtagKeyword;
     if(!hashtagKeyword){
-        res.status(404);
+        res.status(400);
         res.send({
             error: 'please pass the required parameter in the body'
         });
